@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using FilmesAPI.Models;
+using filmesapi.Models;
 using Microsoft.AspNetCore.Mvc;
 using filmesapi.Data;
 using filmesapi.Data.Dtos;
+using AutoMapper;
 
 namespace FilmesAPI.Controllers
 {
@@ -13,22 +14,18 @@ namespace FilmesAPI.Controllers
     public class FilmeController : ControllerBase
     {
         private FilmeContext _context;
+        private IMapper _mapper;
 
-        public FilmeController(FilmeContext context)
+        public FilmeController(FilmeContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost]
         public IActionResult AdicionaFilme([FromBody] CreateFilmeDto filmeDto)
         { 
-            Filme filme = new Filme
-            {
-                Titulo = filmeDto.Titulo,
-                Genero = filmeDto.Genero,
-                Diretor = filmeDto.Diretor,
-                Duracao = filmeDto.Duracao
-            };   
+            Filme filme = _mapper.Map<Filme>(filmeDto);
 
             _context.Filmes.Add(filme);
             _context.SaveChanges();
@@ -49,15 +46,8 @@ namespace FilmesAPI.Controllers
 
             if (filme != null)
             {
-                ReadFilmeDto filmeDto = new ReadFilmeDto
-                {
-                    Id = filme.Id,
-                    Titulo = filme.Titulo,
-                    Diretor = filme.Diretor,
-                    Genero = filme.Genero,
-                    Duracao = filme.Duracao,
-                    HoraConsulta = DateTime.Now
-                };
+                ReadFilmeDto filmeDto = _mapper.Map<ReadFilmeDto>(filme);
+                filmeDto.HoraConsulta = DateTime.Now;
 
                 return Ok(filmeDto);
             }
@@ -68,7 +58,7 @@ namespace FilmesAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult AtualizaFilme(int id, [FromBody] Filme filmeNovo)
+        public IActionResult AtualizaFilme(int id, [FromBody] UpdateFilmeDto filmeDto)
         {
             Filme filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
             if (filme == null) 
@@ -76,11 +66,7 @@ namespace FilmesAPI.Controllers
                 return NotFound();
             }
 
-            filme.Titulo = filmeNovo.Titulo;
-            filme.Genero = filmeNovo.Genero;
-            filme.Duracao = filmeNovo.Duracao;
-            filme.Diretor = filmeNovo.Diretor;
-
+            _mapper.Map(filmeDto, filme);
             _context.SaveChanges();
 
             return NoContent();
