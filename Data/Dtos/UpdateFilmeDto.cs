@@ -1,12 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FilmesAPI.Models
+namespace filmesapi.Data.Dtos
 {
-    public class Filme
+    public class UpdateFilmeDto
     {
-        [Key]
-        [Required]
-        public int Id { get; set; }                
         [Required(ErrorMessage = "O campo \"Título\" é obrigatório.")]
         public string Titulo { get; set; }
         [Required(ErrorMessage = "O campo \"Diretor\" é obrigatório.")]
